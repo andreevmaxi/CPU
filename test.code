@@ -1,4 +1,12 @@
-push 10
-push 20
-add
-end
+PUSH 10
+PUSH 20
+ADD
+CALL maksfunc
+OUTFILE
+END
+
+maksfunc:
+    PUSH 24
+    PUSH 26
+    ADD
+    ADD

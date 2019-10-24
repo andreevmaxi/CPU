@@ -98,7 +98,7 @@ unsigned long long StackHash(DedStack_t* aStack)
     // adding CanaryDataLeft to hash
 
     DEB(tmp = *aStack->CanaryDataLeft);
-`    DEB(tmp *= MaxHashKey);
+    DEB(tmp *= MaxHashKey);
     DEB(tmp ^= tmp >> ByteShift);
     DEB(tmp *= MaxHashKey);
 

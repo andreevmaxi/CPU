@@ -1,13 +1,24 @@
+#include <chrono>
+#include <ctime>
 #include <cstdio>
 #include <vector>
 #include <cstdlib>
-#include <cassert>
+
+#include "libs/MaksAssert.h"
+#include "libs/MaksStack.h"
 
 struct Opers
     {
     char* name;
     int asmnum;
-    int argo; /// arguments for this operation
+    int argo;
+    int mode;
+    };
+
+struct UserFunc
+    {
+    char* name;
+    int label;
     };
 
 bool FileOpen(FILE** f, bool mode, int argc, char* argv[]);
@@ -16,7 +27,7 @@ char* FileRead(FILE* read);
 
 bool ConfigOpen(char** rules, int argc, char* argv[]);
 
-char* BufferAsm(char* buffer, char* conf);
+char* BufferAsm(char* buffer, char* conf, long long* CharNum);
 
 bool ConfInit(char* conf, std::vector<Opers>& Operations, int* OperNum);
 
@@ -27,21 +38,21 @@ bool IntReverse(int* Number, int dozens);
 int main(int argc, char *argv[])
     {
     FILE* CodeFile;
-
+    long long CharNum = 0;
     FileOpen(&CodeFile, 0, argc, argv);
     char* buffer = FileRead(CodeFile);
     fclose(CodeFile);
-    printf("%d \n", __LINE__);
+
     char* config = {};
     ConfigOpen(&config, argc, argv);
-    printf("%d \n", __LINE__);
-    char* AsmOutput = BufferAsm(buffer, config);
-    printf("%d \n", __LINE__);
+
+    char* AsmOutput = BufferAsm(buffer, config, &CharNum);
+
     free(buffer);
     free(config);
-
     FileOpen(&CodeFile, 1, argc, argv);
-    fprintf(CodeFile, "%s", AsmOutput);
+
+    fwrite(AsmOutput, sizeof(char), CharNum + 4, CodeFile);
 
     free(AsmOutput);
     return 0;
@@ -49,7 +60,7 @@ int main(int argc, char *argv[])
 
 bool FileOpen(FILE** f, bool mode, int argc, char* argv[])
     {
-    assert(f != NULL);
+    ASSERT(f != NULL);
 
     int i = 0;
     if(mode == 0)
@@ -78,7 +89,7 @@ bool FileOpen(FILE** f, bool mode, int argc, char* argv[])
 
 char* FileRead(FILE* read)
     {
-    assert(read != NULL);
+    ASSERT(read != NULL);
 
     char tmp, prev;
     int StrSize = 0;
@@ -139,7 +150,7 @@ bool ConfigOpen(char** rules, int argc, char* argv[])
         f = fopen(argv[3], "rb");
         } else
         {
-        f = fopen("default.conf", "rb");
+        f = fopen("config/default.h", "rb");
         }
 
     *rules = FileRead(f);
@@ -147,24 +158,56 @@ bool ConfigOpen(char** rules, int argc, char* argv[])
     return 1;
     }
 
-char* BufferAsm(char* buffer, char* conf)
+char* BufferAsm(char* buffer, char* conf, long long* CharNum)
     {
-    assert(conf != NULL);
-    assert(buffer != NULL);
+    ASSERT(conf != NULL);
+    ASSERT(buffer != NULL);
     char* ans;
 
-    printf("%d \n", __LINE__);
+
     std::vector <Opers> Operations;
+    std::vector <UserFunc> Labels;
+    int LabelNum = 0;
+    int Current = 0;
+    char* ForLabels = buffer;
+    char* FirstLabel = (char*)3; // bog lubit 3cy
+
+    while (*ForLabels != '\0')
+        {
+        if(*ForLabels == '\n' && *(ForLabels + 1) != '\n' && *(ForLabels + 1) != '\r')
+            {
+            ++Current;
+            }
+        if(*ForLabels == ':')
+            {
+            --Current;
+            if(FirstLabel == (char*)3)
+                {
+                FirstLabel = ForLabels;
+                }
+            int i = 1;
+            while (*(ForLabels - i) != '\n')
+                {
+                ++i;
+                }
+            Labels.push_back({});
+            Labels[LabelNum].name = ForLabels - i + 1;
+            Labels[LabelNum].label = Current + 1;
+            ++LabelNum;
+            }
+        ++ForLabels;
+        }
 
     int OperNum = 0;
 
     ConfInit(conf, Operations, &OperNum);
-    printf("%d \n", __LINE__);
+
     Operations.push_back(Opers());
     Operations[OperNum].name = {};
     Operations[OperNum].asmnum = 0;
     Operations[OperNum].argo = 0;
-    ans = (char*)calloc (AnsSizeSuggestion(buffer), sizeof(char));
+    Operations[OperNum].mode = 0;
+    ans = (char*)calloc (AnsSizeSuggestion(buffer) + 4, sizeof(char));
 
     char* TmpB;
     char* TmpO;
@@ -173,14 +216,15 @@ char* BufferAsm(char* buffer, char* conf)
     int OperAns = 0;
 
     TmpAns = ans;
-    printf("%d \n", __LINE__);
-    for(int i = 0; i < OperNum; ++i)
-    {
-    printf("%s\n", Operations[i].name);
-    }
-
-    while (*buffer != '\0')
+    TmpAns += sizeof(int);
+    while (*buffer != '\0' )
         {
+
+        while(*buffer == ' ')
+            {
+            ++buffer;
+            }
+        ++(*CharNum);
         for(int i = 0; i < OperNum; ++i)
             {
             OperAns = OperNum;
@@ -188,6 +232,12 @@ char* BufferAsm(char* buffer, char* conf)
             TmpO = Operations[i].name;
             while(*TmpB == *TmpO && *TmpB != ' ' && *TmpB != '\n' && *TmpO != '\0')
                 {
+                if(*TmpB == ':')
+                    {
+                    buffer = TmpB;
+                    i = OperNum;
+                    break;
+                    }
                 ++TmpB;
                 ++TmpO;
                 }
@@ -196,6 +246,21 @@ char* BufferAsm(char* buffer, char* conf)
                 OperAns = i;
                 i = OperNum;
                 }
+            }
+
+        if(OperAns == OperNum)
+            {
+            while (*buffer != ' ' && *buffer != '\0' && *buffer != '\n' && *buffer != ':')
+                {
+                ++buffer;
+                }
+            }
+        if(*buffer == ':')
+            {
+            ++buffer;
+            } else
+            {
+            ASSERT(OperAns != OperNum);
             }
 
         while(*buffer != ' ' && *buffer != '\n' && *buffer != '\0')
@@ -207,34 +272,78 @@ char* BufferAsm(char* buffer, char* conf)
             ++buffer;
             }
 
-        assert(OperAns != 7);
-        *TmpAns = (char)(Operations[OperAns].asmnum);
-        ++TmpAns;
-
-        for(int i = 0; i < Operations[OperAns].argo; ++i)
+        if(OperAns != OperNum)
             {
-            int TmpIntAns = 0;
-            int dozens = 1;
-            while (*buffer != '\n' && *buffer !='\0')
+            *TmpAns = (char)(Operations[OperAns].asmnum);
+            ++TmpAns;
+
+            for(int i = 0; i < Operations[OperAns].argo; ++i)
                 {
-                TmpIntAns += (int)(*buffer - '0') * dozens;
-                dozens *= 10;
-                ++buffer;
-                }
-                dozens /= 10;
-                IntReverse(&TmpIntAns, dozens);
-            for(int i = 0; i < 4; ++i)
-                {
-                *TmpAns = (char)*((char*)(&TmpIntAns) + i) + 1;
-                ++TmpAns;
-                }
-            if(*buffer != '\0')
-                {
-                ++buffer;
+                if(Operations[OperAns].mode == 1)
+                    {
+                    int TmpIntAns = 0;
+                    int dozens = 1;
+                    while (*buffer != '\n' && *buffer !='\0')
+                        {
+                        TmpIntAns += (int)(*buffer - '0') * dozens;
+                        dozens *= 10;
+                        ++buffer;
+                        }
+                    dozens /= 10;
+                    IntReverse(&TmpIntAns, dozens);
+                    for(int i = 0; i < 4; ++i)
+                        {
+                        *TmpAns = (char)*((char*)(&TmpIntAns) + i);
+                        ++TmpAns;
+                        ++(*CharNum);
+                        }
+                    if(*buffer != '\0')
+                        {
+                        ++buffer;
+                        }
+                    } else
+                    {
+
+                    int LabelAns = 0;
+                    for(int i = 0; i < LabelNum; ++i)
+                        {
+                        LabelAns = LabelNum;
+                        TmpB = buffer;
+                        TmpO = Labels[i].name;
+                        while(*TmpB == *TmpO && *TmpB != ' ' && *TmpB != '\n' && *TmpO != ':')
+                            {
+                            ++TmpB;
+                            ++TmpO;
+                            }
+
+                        if( (*TmpB == ' ' || *TmpB == '\n' || *TmpB == '\0') && *TmpO == ':')
+                            {
+                            LabelAns = i;
+                            i = LabelNum;
+                            }
+                        }
+
+                    ASSERT(LabelAns != LabelNum);
+
+                    for(int i = 0; i < 4; ++i)
+                        {
+                        *TmpAns = (char)*((char*)(&Labels[LabelAns].label) + i);
+                        ++TmpAns;
+                        ++(*CharNum);
+                        }
+                    while(*buffer != ' ' && *buffer != '\n' && *buffer != '\0')
+                        {
+                        ++buffer;
+                        }
+                    if(*buffer != '\0')
+                        {
+                        ++buffer;
+                        }
+                    }
                 }
             }
         }
-
+        *((int*)ans) = *CharNum;
         return ans;
     }
 
@@ -242,19 +351,115 @@ bool ConfInit(char* conf, std::vector<Opers>& Operations, int* OperNum)
     {
     while (*conf != '\0')
         {
+        int i = 0;
+        while (i != 8 && *conf != '\0')
+            {
+            switch (i)
+                {
+                case 0:
+                    if(*conf == 'C')
+                        {
+                        ++i;
+                        }
+                    break;
+
+                case 1:
+                    if(*conf == 'O')
+                        {
+                        ++i;
+                        } else
+                        {
+                        i = 0;
+                        }
+                    break;
+
+                case 2:
+                    if(*conf == 'N')
+                        {
+                        ++i;
+                        } else
+                        {
+                        i = 0;
+                        }
+                    break;
+
+                case 3:
+                    if(*conf == 'F')
+                        {
+                        ++i;
+                        } else
+                        {
+                        i = 0;
+                        }
+                    break;
+
+                case 4:
+                    if(*conf == '_')
+                        {
+                        ++i;
+                        } else
+                        {
+                        i = 0;
+                        }
+                    break;
+
+                case 5:
+                    if(*conf == 'C')
+                        {
+                        ++i;
+                        } else
+                        {
+                        i = 0;
+                        }
+                    break;
+
+                case 6:
+                    if(*conf == 'M')
+                        {
+                        ++i;
+                        } else
+                        {
+                        i = 0;
+                        }
+                    break;
+
+                case 7:
+                    if(*conf == 'D')
+                        {
+                        ++i;
+                        } else
+                        {
+                        i = 0;
+                        }
+                    break;
+                }
+            ++conf;
+            }
+
+        if(*conf == '\0')
+            {
+            break;
+            }
+        ++conf;
+        ++conf;
+
         Operations.push_back(Opers());
         Operations[*OperNum].name = conf;
-        while (*conf != ' ' && *conf != '\0')
+        while(*conf != ',')
+            {
+            ++conf;
+            }
+        *conf = '\0';
+        ++conf;
+
+        while(*conf == ' ')
             {
             ++conf;
             }
 
-        *conf = '\0';
-        ++conf;
-
         Operations[*OperNum].asmnum = 0;
         int dozens = 1;
-        while (*conf != ' ' && *conf != '\0')
+        while (*conf != ' ' && *conf != '\0' && *conf != ',')
             {
             Operations[*OperNum].asmnum += (int)(*conf - '0') * dozens;
             dozens *= 10;
@@ -263,20 +468,25 @@ bool ConfInit(char* conf, std::vector<Opers>& Operations, int* OperNum)
         ++conf;
         Operations[*OperNum].argo = 0;
         dozens = 1;
-        while (*conf != '\n' && *conf !='\0')
+        while(*conf == ' ')
+            {
+            ++conf;
+            }
+        while (*conf != '\n' && *conf !='\0' && *conf != ',')
             {
             Operations[*OperNum].argo += (int)(*conf - '0') * dozens;
             dozens *= 10;
             ++conf;
             }
-
-        dozens /= 10;
-        IntReverse(&Operations[*OperNum].argo, dozens);
-        if(*conf == '\n')
+        ++conf;
+        while(*conf == ' ')
             {
             ++conf;
             }
-
+        dozens /= 10;
+        IntReverse(&Operations[*OperNum].argo, dozens);
+        Operations[*OperNum].mode = (int)(*conf - '0');
+        ++conf;
         ++(*OperNum);
         }
     return 1;
@@ -284,7 +494,7 @@ bool ConfInit(char* conf, std::vector<Opers>& Operations, int* OperNum)
 
 int AnsSizeSuggestion(char* buff)
     {
-    assert(buff != NULL);
+    ASSERT(buff != NULL);
 
     int SSize = 0; // suggestion size
     while(*buff != '\0')
@@ -301,7 +511,7 @@ int AnsSizeSuggestion(char* buff)
 
 bool IntReverse(int* Number, int dozens)
     {
-    assert(Number != 0);
+    ASSERT(Number != 0);
 
     int tmp = 0;
 

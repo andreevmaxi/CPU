@@ -1,11 +1,10 @@
-#include <stack>
 #include <iostream>
 #include <chrono>
 #include <ctime>
 #include <cstdio>
 #include <string>
 #include "libs\MaksAssert.h"
-#include "config\CPUStackUseHelper.h"
+#include "libs\Maks"
 
 bool FileOpen(FILE** f, bool mode, int argc, char* argv[]);
 
@@ -13,16 +12,14 @@ int main(int argc, char *argv[])
     {
     FILE* TmpFile;
     FILE* OutputFile;
-    int CharNum = 0;
-    char* OpenFile;
-
+    int CharNum;
     if(argc > 1)
         {
-        OpenFile = argv[1];
+        char* OpenFile = argv[1];
         } else
         {
         char NameFile[100] = "test.asm";
-        OpenFile = &NameFile[0];
+        char* OpenFile = &NameFile;
         }
     if(argc > 2)
         {
@@ -31,50 +28,45 @@ int main(int argc, char *argv[])
         {
         OutputFile = fopen("DefaultOutput.txt", "w");
         }
-    FileOpen(&TmpFile, 0, argc, argv);
+    FileOpen(TmpFile, 0, argc, argv[]);
 
     DedStack_t cpu_stack;
     INIT;
-    fscanf(TmpFile, "%d", &CharNum);
+    fscanf(TmpFile, "%d", CharNum);
     char* buffer = (char*)calloc (CharNum, sizeof(char));
     fread(buffer, sizeof(char), CharNum, TmpFile);
     fclose(TmpFile);
     FILE* errors;
-    FileOpen(&errors, 1, argc, argv);
+    FileOpen(errors, 1, argc, argv[]);
 
-    std::stack<int> label_stack;
+    std::stack label_stack;
     char* NowLabel = buffer;
     bool EndFlag = 1;
     int AsmLine = 1;
-
     while (EndFlag && NowLabel < (buffer + CharNum))
         {
         switch (*NowLabel)
             {
-                #define CONF_CMD(Name,Id,Args,Mode,Code)                 \
-                                                                 \
-                case Id:                                         \
-                    {                                            \
-                    Code;                                        \
-			        break;                                       \
-                    };
+                #define CONF_CMD( name, id, args, mode, code )   \
+                                                                \
+                case id: {                                      \
+                    code                                        \
+			        break; }
 
+                #include "config/default.h"
 
-                #include "config/default.h" // tyt kizda
-
-                #undef CONF_CMD
+                #undef   CONF_CMD
 
                 default: {
                 free(buffer);
                 DESTRUCK;
                 time_t now = std::chrono::system_clock::to_time_t ( std::chrono::system_clock::now() );
                 fprintf(errors, "(!!!CRITICAL ERROR!!!)\nThere is undefined function\nO N L I N E HA HA HA: %d\non label number: %d\nIn program: %s\ntime: %s\n", AsmLine,(int)(NowLabel - buffer), OpenFile, ctime(&now));
-                abort;
-                };
+                assert(*"Undefined function" != *"Undefined function");
+                }
             }
-
-        ++AsmLine;
-        ++NowLabel;
+            ++AsmLine;
+            ++NowLabel;
         }
     return 0;
     }
