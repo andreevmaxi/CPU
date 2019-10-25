@@ -4,8 +4,9 @@
 #include <ctime>
 #include <cstdio>
 #include <string>
-#include "libs\MaksAssert.h"
+#include <cassert>
 #include "config\CPUStackUseHelper.h"
+#include "config\default_enum.h"
 
 bool FileOpen(FILE** f, bool mode, int argc, char* argv[]);
 
@@ -51,9 +52,9 @@ int main(int argc, char *argv[])
         {
         switch (*NowLabel)
             {
-                #define CONF_CMD(Name,Id,Args,Mode,Code)                 \
+                #define MAKS_CMD( Name, Id, Args, Mode, Code )   \
                                                                  \
-                case Id:                                         \
+                case CMD_##Name:                                     \
                     {                                            \
                     Code;                                        \
 			        break;                                       \
@@ -81,7 +82,7 @@ int main(int argc, char *argv[])
 
 bool FileOpen(FILE** f, bool mode, int argc, char* argv[])
     {
-    ASSERT(f != NULL);
+    assert(f != NULL);
 
     int i = 0;
     if(mode == 0)

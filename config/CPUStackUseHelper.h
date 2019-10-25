@@ -6,9 +6,9 @@
 
 #include "../libs/MaksStack.h"
 
-#define DUMP_ASM( params ) DUMP(&cpu_stack, params)
-#define POP StackPop(&cpu_stack)
-#define INIT StackInit(&cpu_stack)
-#define PUSH( params ) StackPush(&cpu_stack, params)
-#define DESTRUCK StackDestruck(&cpu_stack)
-#define EMPTY IsEmptyStack(&cpu_stack)
+#define MAKS_DUMP_ASM( params ) DUMP(&cpu_stack, params)
+#define MAKS_POP StackPop(&cpu_stack)
+#define MAKS_INIT StackInit(&cpu_stack)
+#define MAKS_PUSH( params ) StackPush(&cpu_stack, params)
+#define MAKS_DESTRUCK StackDestruck(&cpu_stack)
+#define MAKS_EMPTY IsEmptyStack(&cpu_stack)

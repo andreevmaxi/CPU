@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     char* buffer = FileRead(CodeFile);
     fclose(CodeFile);
 
-    char* config = {};
+    char* config = 0;
     ConfigOpen(&config, argc, argv);
 
     char* AsmOutput = BufferAsm(buffer, config, &CharNum);
@@ -52,8 +52,7 @@ int main(int argc, char *argv[])
     free(config);
     FileOpen(&CodeFile, 1, argc, argv);
 
-    fwrite(AsmOutput, sizeof(char), CharNum, CodeFile);
-
+    fwrite(AsmOutput, sizeof(char), CharNum + 4, CodeFile);
 
     free(AsmOutput);
     return 0;
@@ -89,59 +88,59 @@ bool FileOpen(FILE** f, bool mode, int argc, char* argv[])
     }
 
 char* FileRead(FILE* read)
+{
+ASSERT(read != NULL);
+
+char tmp, prev;
+int StrSize = 0;
+tmp = 0;
+prev = 0;
+
+tmp = (char)fgetc(read);
+
+while((tmp != EOF))
     {
-    ASSERT(read != NULL);
-
-    char tmp, prev;
-    int StrSize = 0;
-    tmp = {};
-    prev = {};
-
+    if(tmp != '\r')
+        {
+        if (!(tmp == prev && tmp == '\n'))
+            {
+            ++StrSize;
+            prev = tmp;
+            }
+        }
     tmp = (char)fgetc(read);
+    }
 
-    while((tmp != EOF))
+rewind(read);
+
+char* buff = (char*)calloc ( (StrSize + 2), sizeof(char));
+
+char* LastChar = buff;
+tmp  = '\0';
+prev = '\n';
+
+while ( (tmp = getc (read)) != EOF )
+{
+    if(tmp != '\r')
+    {
+        if (!(tmp == prev && tmp == '\n'))
         {
-        if(tmp != '\r')
-            {
-            if (!(tmp == prev && tmp == '\n'))
-                {
-                ++StrSize;
-                prev = tmp;
-                }
-            }
-        tmp = (char)fgetc(read);
+            *LastChar = tmp;
+            prev = tmp;
+            ++LastChar;
         }
 
-    rewind(read);
-
-    char* buff = (char*)calloc ( (StrSize + 2), sizeof(char));
-
-    char* LastChar = buff;
-    tmp  = '\0';
-    prev = '\n';
-
-    while ( (tmp = getc (read)) != EOF )
-    {
-        if(tmp != '\r')
-        {
-            if (!(tmp == prev && tmp == '\n'))
-            {
-                *LastChar = tmp;
-                prev = tmp;
-                ++LastChar;
-            }
-
-        }
     }
+}
 
-    if(*(LastChar - 1) != '\0')
-    {
-        *(LastChar) = '\0';
-    }
+if(*(LastChar - 1) != '\0')
+{
+    *(LastChar) = '\0';
+}
 
-    return buff;
+return buff;
 
-    }
+}
 
 bool ConfigOpen(char** rules, int argc, char* argv[])
     {
@@ -204,11 +203,11 @@ char* BufferAsm(char* buffer, char* conf, long long* CharNum)
     ConfInit(conf, Operations, &OperNum);
 
     Operations.push_back(Opers());
-    Operations[OperNum].name = {};
+    Operations[OperNum].name = 0;
     Operations[OperNum].asmnum = 0;
     Operations[OperNum].argo = 0;
     Operations[OperNum].mode = 0;
-    ans = (char*)calloc (AnsSizeSuggestion(buffer), sizeof(char));
+    ans = (char*)calloc (AnsSizeSuggestion(buffer) + 4, sizeof(char));
 
     char* TmpB;
     char* TmpO;
@@ -217,13 +216,13 @@ char* BufferAsm(char* buffer, char* conf, long long* CharNum)
     int OperAns = 0;
 
     TmpAns = ans;
-
-
+    TmpAns += sizeof(int);
     while (*buffer != '\0' )
         {
-        while(*conf == ' ')
+
+        while(*buffer == ' ')
             {
-            ++conf;
+            ++buffer;
             }
         ++(*CharNum);
         for(int i = 0; i < OperNum; ++i)
@@ -249,16 +248,18 @@ char* BufferAsm(char* buffer, char* conf, long long* CharNum)
                 }
             }
 
+        if(OperAns == OperNum)
+            {
+            while (*buffer != ' ' && *buffer != '\0' && *buffer != '\n' && *buffer != ':')
+                {
+                ++buffer;
+                }
+            }
         if(*buffer == ':')
             {
             ++buffer;
             } else
             {
-            if(OperAns == OperNum)
-                {
-                while ()
-                }
-            printf("%c\n\n", *buffer);
             ASSERT(OperAns != OperNum);
             }
 
@@ -342,7 +343,7 @@ char* BufferAsm(char* buffer, char* conf, long long* CharNum)
                 }
             }
         }
-
+        *((int*)ans) = *CharNum;
         return ans;
     }
 

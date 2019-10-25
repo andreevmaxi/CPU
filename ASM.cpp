@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     char* buffer = FileRead(CodeFile);
     fclose(CodeFile);
 
-    char* config = {};
+    char* config = 0;
     ConfigOpen(&config, argc, argv);
 
     char* AsmOutput = BufferAsm(buffer, config, &CharNum);
@@ -93,8 +93,8 @@ char* FileRead(FILE* read)
 
     char tmp, prev;
     int StrSize = 0;
-    tmp = {};
-    prev = {};
+    tmp = 0;
+    prev = 0;
 
     tmp = (char)fgetc(read);
 
@@ -203,7 +203,7 @@ char* BufferAsm(char* buffer, char* conf, long long* CharNum)
     ConfInit(conf, Operations, &OperNum);
 
     Operations.push_back(Opers());
-    Operations[OperNum].name = {};
+    Operations[OperNum].name = 0;
     Operations[OperNum].asmnum = 0;
     Operations[OperNum].argo = 0;
     Operations[OperNum].mode = 0;

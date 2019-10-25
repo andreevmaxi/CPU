@@ -11,120 +11,198 @@
 #include <chrono>
 #include <ctime>
 #include <cstdio>
-#include "..\libs\MaksAssert.h"
+#include <cassert>
+#include <cstdlib>
 #include "CPUStackUseHelper.h"
 
-CONF_CMD (END, 0, 0, 1,
+MAKS_CMD (0, END, 0,
     {
     free(buffer);
-    DESTRUCK;
+    MAKS_DESTRUCK;
     EndFlag = 0;
     break;
+    },
+    {
+    ++(*CharNum);
     })
 
-CONF_CMD (PUSH, 1, 1, 1,
+MAKS_CMD (1, PUSH, 1,
     {
     PUSH(*((StackElem_t*)(NowLabel)));
     NowLabel += sizeof(StackElem_t);
     break;
+    },
+    {
+    ++(*CharNum);
+    while(*TmpBuffer != '\0')
+        {
+        ++TmpBuffer;
+        }
+    for(int i = 0, i < Argc, ++i)
+        {
+        int  TmpInt = atoi(TmpBuffer);
+
+        for(int i = 0; i < 4; ++i)
+            {
+            *TmpAns = (char)*((char*)(&TmpInt) + i);
+            ++TmpAns;
+            ++(*CharNum);
+            }
+        }
     })
 
-CONF_CMD (POP, 2, 0, 1,
+MAKS_CMD (2, POP, 0,
     {
-    POP;
+    MAKS_POP;
     break;
+    },
+    {
+    ++(*CharNum);
     })
 
-CONF_CMD (ADD, 3, 0, 1,
+MAKS_CMD (3, ADD, 0,
     {
-    StackElem_t tmp1 = POP;
-    StackElem_t tmp2 = POP;
-    PUSH(tmp1 + tmp2);
+    StackElem_t tmp1 = MAKS_POP;
+    StackElem_t tmp2 = MAKS_POP;
+    MAKS_PUSH(tmp1 + tmp2);
     break;
+    },
+    {
+    ++(*CharNum);
     })
 
-CONF_CMD (SUB, 4, 0, 1,
+MAKS_CMD (4, SUB, 0,
     {
-    StackElem_t tmp1 = POP;
-    StackElem_t tmp2 = POP;
-    PUSH(tmp2 - tmp1);
+    StackElem_t tmp1 = MAKS_POP;
+    StackElem_t tmp2 = MAKS_POP;
+    MAKS_PUSH(tmp2 - tmp1);
     break;
+    },
+    {
+    ++(*CharNum);
     })
 
-CONF_CMD (MUL, 5, 0, 1,
+MAKS_CMD (5, MUL, 0,
     {
-    StackElem_t tmp1 = POP;
-    StackElem_t tmp2 = POP;
-    PUSH(tmp1 * tmp2);
+    StackElem_t tmp1 = MAKS_POP;
+    StackElem_t tmp2 = MAKS_POP;
+    MAKS_PUSH(tmp1 * tmp2);
     break;
+    },
+    {
+    ++(*CharNum);
     })
 
-CONF_CMD (DIV, 6, 0, 1,
+MAKS_CMD (6, DIV, 0,
     {
-    StackElem_t tmp1 = POP;
-    StackElem_t tmp2 = POP;
+    StackElem_t tmp1 = MAKS_POP;
+    StackElem_t tmp2 = MAKS_POP;
     if(tmp1 == 0)
         {
         free(buffer);
-        DESTRUCK;
-	time_t now = std::chrono::system_clock::to_time_t ( std::chrono::system_clock::now() );
+        MAKS_DESTRUCK;
+        time_t now = std::chrono::system_clock::to_time_t ( std::chrono::system_clock::now() );
         fprintf(errors, "(!!!CRITICAL ERROR!!!)\nYou divided on zero\nO N L I N E HA HA HA: %d\non label number: %d\nIn program: %s\ntime: %s\n", AsmLine, (int)(NowLabel - buffer), OpenFile, ctime(&now));
-        ASSERT(tmp1 != 0);
+        assert(tmp1 != 0);
         }
-    PUSH(tmp2 / tmp1);
+    MAKS_PUSH(tmp2 / tmp1);
     break;
+    },
+    {
+    ++(*CharNum);
     })
 
-CONF_CMD (SQRT, 7, 0, 1,
+MAKS_CMD (7, SQRT, 0,
     {
-    StackElem_t tmp1 = POP;
+    StackElem_t tmp1 = MAKS_POP;
 
     if(tmp1 < 0)
         {
         free(buffer);
-        DESTRUCK;
+        MAKS_DESTRUCK;
         time_t now = std::chrono::system_clock::to_time_t ( std::chrono::system_clock::now() );
         fprintf(errors, "(!!!CRITICAL ERROR!!!)\nYou wanted to get a square from a negative number\nO N L I N E HA HA HA: %d\non label number: %d\nIn program: %s\ntime: %s\n", AsmLine, (int)(NowLabel - buffer), OpenFile, ctime(&now));
-        ASSERT(tmp1 > 0);
+        assert(tmp1 > 0);
         }
-    PUSH(sqrt(tmp1));
+    MAKS_PUSH(sqrt(tmp1));
     break;
+    },
+    {
+    ++(*CharNum);
     })
 
-CONF_CMD (IN, 8, 0, 1,
+MAKS_CMD (8, IN, 0,
     {
     StackElem_t tmp1 = {};
 
     std::cin >> tmp1;
-    PUSH(tmp1);
+    MAKS_PUSH(tmp1);
     break;
+    },
+    {
+    ++(*CharNum);
     })
 
-CONF_CMD (OUT, 9, 0, 1,
+MAKS_CMD (9, OUT, 0,
     {
-    StackElem_t tmp1 = POP;
+    StackElem_t tmp1 = MAKS_POP;
     std::cout << tmp1;
     break;
+    },
+    {
+    ++(*CharNum);
     })
 
-CONF_CMD (OUTFILE, 19, 0, 1,
+MAKS_CMD (10, OUTFILE, 0,
     {
-    StackElem_t tmp1 = POP;
+    StackElem_t tmp1 = MAKS_POP;
     fprintf(OutputFile, "%d ",tmp1);
     break;
+    },
+    {
+    ++(*CharNum);
     })
 
 
-CONF_CMD (JMP, 10, 1, 2,
+MAKS_CMD (11, JMP, 1,
     {
     NowLabel = buffer + *((int*)(NowLaber));
     break;
+    },
+    {
+    ++(*CharNum);
+    while(*TmpBuffer != '\0')
+        {
+        ++TmpBuffer;
+        }
+    for(int i = 0, i < Argc, ++i)
+        {
+        int TmpInt = -1;
+        for(int i = 0; i < Labels.size(); ++i)
+            {
+            if(TmpBuffer == Labels[i].name)
+                {
+                TmpInt = Labels[i].label;
+                }
+            }
+        if(TmpInt == -1)
+            {
+            printf("(!!!CRIT_ERROR)!!!\nYour jmp points to undefined label!");
+            }
+        assert(TmpInt != -1);
+        for(int i = 0; i < 4; ++i)
+            {
+            *TmpAns = (char)*((char*)(&TmpInt) + i);
+            ++TmpAns;
+            ++(*CharNum);
+            }
+        }
     })
 
-CONF_CMD (JA, 11, 1, 2,
+MAKS_CMD (12, JA, 1,
     {
-    StackElem_t tmp1 = POP;
-    StackElem_t tmp2 = POP;
+    StackElem_t tmp1 = MAKS_POP;
+    StackElem_t tmp2 = MAKS_POP;
 
     if (tmp2 > tmp1)
         {
@@ -134,12 +212,41 @@ CONF_CMD (JA, 11, 1, 2,
         NowLabel += sizeof(int);
         }
     break;
+    },
+    {
+    ++(*CharNum);
+    while(*TmpBuffer != '\0')
+        {
+        ++TmpBuffer;
+        }
+    for(int i = 0, i < Argc, ++i)
+        {
+        int TmpInt = -1;
+        for(int i = 0; i < Labels.size(); ++i)
+            {
+            if(TmpBuffer == Labels[i].name)
+                {
+                TmpInt = Labels[i].label;
+                }
+            }
+        if(TmpInt == -1)
+            {
+            printf("(!!!CRIT_ERROR)!!!\nYour jmp points to undefined label!");
+            }
+        assert(TmpInt != -1);
+        for(int i = 0; i < 4; ++i)
+            {
+            *TmpAns = (char)*((char*)(&TmpInt) + i);
+            ++TmpAns;
+            ++(*CharNum);
+            }
+        }
     })
 
-CONF_CMD (JAE, 12, 1, 2,
+MAKS_CMD (13, JAE, 1,
     {
-    StackElem_t tmp1 = POP;
-    StackElem_t tmp2 = POP;
+    StackElem_t tmp1 = MAKS_POP;
+    StackElem_t tmp2 = MAKS_POP;
 
     if (tmp2 >= tmp1)
         {
@@ -149,12 +256,41 @@ CONF_CMD (JAE, 12, 1, 2,
         NowLabel += sizeof(int);
         }
     break;
+    },
+    {
+    ++(*CharNum);
+    while(*TmpBuffer != '\0')
+        {
+        ++TmpBuffer;
+        }
+    for(int i = 0, i < Argc, ++i)
+        {
+        int TmpInt = -1;
+        for(int i = 0; i < Labels.size(); ++i)
+            {
+            if(TmpBuffer == Labels[i].name)
+                {
+                TmpInt = Labels[i].label;
+                }
+            }
+        if(TmpInt == -1)
+            {
+            printf("(!!!CRIT_ERROR)!!!\nYour jmp points to undefined label!");
+            }
+        assert(TmpInt != -1);
+        for(int i = 0; i < 4; ++i)
+            {
+            *TmpAns = (char)*((char*)(&TmpInt) + i);
+            ++TmpAns;
+            ++(*CharNum);
+            }
+        }
     })
 
-CONF_CMD (JB, 13, 1, 2,
+MAKS_CMD (14, JB, 1,
     {
-    StackElem_t tmp1 = POP;
-    StackElem_t tmp2 = POP;
+    StackElem_t tmp1 = MAKS_POP;
+    StackElem_t tmp2 = MAKS_POP;
 
     if (tmp2 < tmp1)
         {
@@ -164,12 +300,41 @@ CONF_CMD (JB, 13, 1, 2,
         NowLabel += sizeof(int);
         }
     break;
+    },
+    {
+    ++(*CharNum);
+    while(*TmpBuffer != '\0')
+        {
+        ++TmpBuffer;
+        }
+    for(int i = 0, i < Argc, ++i)
+        {
+        int TmpInt = -1;
+        for(int i = 0; i < Labels.size(); ++i)
+            {
+            if(TmpBuffer == Labels[i].name)
+                {
+                TmpInt = Labels[i].label;
+                }
+            }
+        if(TmpInt == -1)
+            {
+            printf("(!!!CRIT_ERROR)!!!\nYour jmp points to undefined label!");
+            }
+        assert(TmpInt != -1);
+        for(int i = 0; i < 4; ++i)
+            {
+            *TmpAns = (char)*((char*)(&TmpInt) + i);
+            ++TmpAns;
+            ++(*CharNum);
+            }
+        }
     })
 
-CONF_CMD (JBE, 14, 1, 2,
+MAKS_CMD (15, JBE, 1,
     {
-    StackElem_t tmp1 = POP;
-    StackElem_t tmp2 = POP;
+    StackElem_t tmp1 = MAKS_POP;
+    StackElem_t tmp2 = MAKS_POP;
 
     if (tmp2 <= tmp1)
         {
@@ -179,12 +344,41 @@ CONF_CMD (JBE, 14, 1, 2,
         NowLabel += sizeof(int);
         }
     break;
+    },
+    {
+    ++(*CharNum);
+    while(*TmpBuffer != '\0')
+        {
+        ++TmpBuffer;
+        }
+    for(int i = 0, i < Argc, ++i)
+        {
+        int TmpInt = -1;
+        for(int i = 0; i < Labels.size(); ++i)
+            {
+            if(TmpBuffer == Labels[i].name)
+                {
+                TmpInt = Labels[i].label;
+                }
+            }
+        if(TmpInt == -1)
+            {
+            printf("(!!!CRIT_ERROR)!!!\nYour jmp points to undefined label!");
+            }
+        assert(TmpInt != -1);
+        for(int i = 0; i < 4; ++i)
+            {
+            *TmpAns = (char)*((char*)(&TmpInt) + i);
+            ++TmpAns;
+            ++(*CharNum);
+            }
+        }
     })
 
-CONF_CMD (JE, 15, 1, 2,
+MAKS_CMD (16, JE, 1,
     {
-    StackElem_t tmp1 = POP;
-    StackElem_t tmp2 = POP;
+    StackElem_t tmp1 = MAKS_POP;
+    StackElem_t tmp2 = MAKS_POP;
 
     if (tmp2 == tmp1)
         {
@@ -194,12 +388,41 @@ CONF_CMD (JE, 15, 1, 2,
         NowLabel += sizeof(int);
         }
     break;
+    },
+    {
+    ++(*CharNum);
+    while(*TmpBuffer != '\0')
+        {
+        ++TmpBuffer;
+        }
+    for(int i = 0, i < Argc, ++i)
+        {
+        int TmpInt = -1;
+        for(int i = 0; i < Labels.size(); ++i)
+            {
+            if(TmpBuffer == Labels[i].name)
+                {
+                TmpInt = Labels[i].label;
+                }
+            }
+        if(TmpInt == -1)
+            {
+            printf("(!!!CRIT_ERROR)!!!\nYour jmp points to undefined label!");
+            }
+        assert(TmpInt != -1);
+        for(int i = 0; i < 4; ++i)
+            {
+            *TmpAns = (char)*((char*)(&TmpInt) + i);
+            ++TmpAns;
+            ++(*CharNum);
+            }
+        }
     })
 
-CONF_CMD (JNE, 16, 1, 2,
+MAKS_CMD (17, JNE, 1,
     {
-    StackElem_t tmp1 = POP;
-    StackElem_t tmp2 = POP;
+    StackElem_t tmp1 = MAKS_POP;
+    StackElem_t tmp2 = MAKS_POP;
 
     if (tmp2 != tmp1)
         {
@@ -209,18 +432,79 @@ CONF_CMD (JNE, 16, 1, 2,
         NowLabel += sizeof(int);
         }
     break;
+    },
+    {
+    ++(*CharNum);
+    while(*TmpBuffer != '\0')
+        {
+        ++TmpBuffer;
+        }
+    for(int i = 0, i < Argc, ++i)
+        {
+        int TmpInt = -1;
+        for(int i = 0; i < Labels.size(); ++i)
+            {
+            if(TmpBuffer == Labels[i].name)
+                {
+                TmpInt = Labels[i].label;
+                }
+            }
+        if(TmpInt == -1)
+            {
+            printf("(!!!CRIT_ERROR)!!!\nYour jmp points to undefined label!");
+            }
+        assert(TmpInt != -1);
+        for(int i = 0; i < 4; ++i)
+            {
+            *TmpAns = (char)*((char*)(&TmpInt) + i);
+            ++TmpAns;
+            ++(*CharNum);
+            }
+        }
     })
 
-CONF_CMD (CALL, 17, 1, 2,
+MAKS_CMD (18, CALL, 1,
     {
     label_stack.push(((int)(NowLaber - buffer) + sizeof(int)));
     NowLabel = buffer + *((int*)(NowLaber));
     break;
+    },
+    {
+    ++(*CharNum);
+    while(*TmpBuffer != '\0')
+        {
+        ++TmpBuffer;
+        }
+    for(int i = 0, i < Argc, ++i)
+        {
+        int TmpInt = -1;
+        for(int i = 0; i < Labels.size(); ++i)
+            {
+            if(TmpBuffer == Labels[i].name)
+                {
+                TmpInt = Labels[i].label;
+                }
+            }
+        if(TmpInt == -1)
+            {
+            printf("(!!!CRIT_ERROR)!!!\nYour jmp points to undefined label!\nUL: %s", TmpBuffer);
+            }
+        assert(TmpInt != -1);
+        for(int i = 0; i < 4; ++i)
+            {
+            *TmpAns = (char)*((char*)(&TmpInt) + i);
+            ++TmpAns;
+            ++(*CharNum);
+            }
+        }
     })
 
-CONF_CMD (RET, 18, 1, 2,
+MAKS_CMD (19, RET, 1,
     {
     NowLabel = buffer + label_stack.top;
     label_stack.pop;
     break;
+    },
+    {
+    ++(*CharNum);
     })

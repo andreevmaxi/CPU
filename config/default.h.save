@@ -1,0 +1,288 @@
+/*
+* It is default config file for assembler and cpu
+* 1 arg - name of func
+* 2 arg - id of func
+* 3 arg - num of args of func
+* 4 arg - mode (1 - for default functions, 2 - for funcs with labels)
+*/
+
+#include <stack>
+#include <iostream>
+#include <chrono>
+#include <ctime>
+#include <cstdio>
+#include <cassert>
+#include "CPUStackUseHelper.h"
+
+MAKS_CMD (END, 0,
+    {
+    free(buffer);
+    MAKS_DESTRUCK;
+    EndFlag = 0;
+    break;
+    },
+    {
+    *ans = ##Name;
+    ++(*CharNum);
+    })
+
+MAKS_CMD (PUSH, 1,
+    {
+    PUSH(*((StackElem_t*)(NowLabel)));
+    NowLabel += sizeof(StackElem_t);
+    break;
+    },
+    {
+    *ans = ##Name;
+    ++(*CharNum);
+    ++NowLabel;
+    for(int i = 0, i < argc, ++i)
+        {
+        char TmpAChar[5] = TmpBuffer;
+        int  TmpInt      = atoi(TmpAChar);
+
+        for(int i = 0; i < 4; ++i)
+            {
+            *TmpAns = (char)*((char*)(&TmpInt) + i);
+            ++TmpAns;
+            ++(*CharNum);
+            ++NowLabel;
+            }
+        if(*TmpBuffer != '\0')
+            {
+            ++TmpBuffer;
+            }
+        }
+    })
+
+MAKS_CMD (POP, 0,
+    {
+    MAKS_POP;
+    break;
+    },
+    {
+    *ans = ##Name;
+    ++(*CharNum);++NowLabel;
+    })
+
+MAKS_CMD (ADD, 0,
+    {
+    StackElem_t tmp1 = MAKS_POP;
+    StackElem_t tmp2 = MAKS_POP;
+    MAKS_PUSH(tmp1 + tmp2);
+    break;
+    },
+    {
+    *ans = ##Name;
+    ++(*CharNum);
+    })
+
+MAKS_CMD (SUB, 0,
+    {
+    StackElem_t tmp1 = MAKS_POP;
+    StackElem_t tmp2 = MAKS_POP;
+    MAKS_PUSH(tmp2 - tmp1);
+    break;
+    },
+    {
+    *ans = ##Name;
+    ++(*CharNum);
+    })
+
+MAKS_CMD (MUL, 0,
+    {
+    StackElem_t tmp1 = MAKS_POP;
+    StackElem_t tmp2 = MAKS_POP;
+    MAKS_PUSH(tmp1 * tmp2);
+    break;
+    },
+    {
+    *ans = ##Name;
+    ++(*CharNum);
+    })
+
+MAKS_CMD (DIV, 0,
+    {
+    StackElem_t tmp1 = MAKS_POP;
+    StackElem_t tmp2 = MAKS_POP;
+    if(tmp1 == 0)
+        {
+        free(buffer);
+        MAKS_DESTRUCK;
+        time_t now = std::chrono::system_clock::to_time_t ( std::chrono::system_clock::now() );
+        fprintf(errors, "(!!!CRITICAL ERROR!!!)\nYou divided on zero\nO N L I N E HA HA HA: %d\non label number: %d\nIn program: %s\ntime: %s\n", AsmLine, (int)(NowLabel - buffer), OpenFile, ctime(&now));
+        assert(tmp1 != 0);
+        }
+    MAKS_PUSH(tmp2 / tmp1);
+    break;
+    },
+    {
+    *ans = ##Name;
+    ++(*CharNum);
+    })
+
+MAKS_CMD (SQRT, 0,
+    {
+    StackElem_t tmp1 = MAKS_POP;
+
+    if(tmp1 < 0)
+        {
+        free(buffer);
+        MAKS_DESTRUCK;
+        time_t now = std::chrono::system_clock::to_time_t ( std::chrono::system_clock::now() );
+        fprintf(errors, "(!!!CRITICAL ERROR!!!)\nYou wanted to get a square from a negative number\nO N L I N E HA HA HA: %d\non label number: %d\nIn program: %s\ntime: %s\n", AsmLine, (int)(NowLabel - buffer), OpenFile, ctime(&now));
+        assert(tmp1 > 0);
+        }
+    MAKS_PUSH(sqrt(tmp1));
+    break;
+    },
+    {
+    *ans = ##Name;
+    ++(*CharNum);
+    })
+
+MAKS_CMD (IN, 0,
+    {
+    StackElem_t tmp1 = {};
+
+    std::cin >> tmp1;
+    MAKS_PUSH(tmp1);
+    break;
+    },
+    {
+    *ans = ##Name;
+    ++(*CharNum);
+    })
+
+MAKS_CMD (OUT, 0,
+    {
+    StackElem_t tmp1 = MAKS_POP;
+    std::cout << tmp1;
+    break;
+    },
+    {
+    *ans = ##Name;
+    ++(*CharNum);
+    })
+
+MAKS_CMD (OUTFILE, 0,
+    {
+    StackElem_t tmp1 = MAKS_POP;
+    fprintf(OutputFile, "%d ",tmp1);
+    break;
+    },
+    {
+    *ans = ##Name;
+    ++(*CharNum);
+    })
+
+
+MAKS_CMD (JMP, 1,
+    {
+    NowLabel = buffer + *((int*)(NowLaber));
+    break;
+    })
+
+MAKS_CMD (JA, 1,
+    {
+    StackElem_t tmp1 = MAKS_POP;
+    StackElem_t tmp2 = MAKS_POP;
+
+    if (tmp2 > tmp1)
+        {
+        NowLabel = buffer + *((int*)(NowLaber));
+        }else
+        {
+        NowLabel += sizeof(int);
+        }
+    break;
+    })
+
+MAKS_CMD (JAE, 1,
+    {
+    StackElem_t tmp1 = MAKS_POP;
+    StackElem_t tmp2 = MAKS_POP;
+
+    if (tmp2 >= tmp1)
+        {
+        NowLabel = buffer + *((int*)(NowLaber));
+        }else
+        {
+        NowLabel += sizeof(int);
+        }
+    break;
+    })
+
+MAKS_CMD (JB, 1,
+    {
+    StackElem_t tmp1 = MAKS_POP;
+    StackElem_t tmp2 = MAKS_POP;
+
+    if (tmp2 < tmp1)
+        {
+        NowLabel = buffer + *((int*)(NowLaber));
+        }else
+        {
+        NowLabel += sizeof(int);
+        }
+    break;
+    })
+
+MAKS_CMD (JBE, 1,
+    {
+    StackElem_t tmp1 = MAKS_POP;
+    StackElem_t tmp2 = MAKS_POP;
+
+    if (tmp2 <= tmp1)
+        {
+        NowLabel = buffer + *((int*)(NowLaber));
+        }else
+        {
+        NowLabel += sizeof(int);
+        }
+    break;
+    })
+
+MAKS_CMD (JE, 1,
+    {
+    StackElem_t tmp1 = MAKS_POP;
+    StackElem_t tmp2 = MAKS_POP;
+
+    if (tmp2 == tmp1)
+        {
+        NowLabel = buffer + *((int*)(NowLaber));
+        }else
+        {
+        NowLabel += sizeof(int);
+        }
+    break;
+    })
+
+MAKS_CMD (JNE, 1,
+    {
+    StackElem_t tmp1 = MAKS_POP;
+    StackElem_t tmp2 = MAKS_POP;
+
+    if (tmp2 != tmp1)
+        {
+        NowLabel = buffer + *((int*)(NowLaber));
+        }else
+        {
+        NowLabel += sizeof(int);
+        }
+    break;
+    })
+
+MAKS_CMD (CALL, 1,
+    {
+    label_stack.push(((int)(NowLaber - buffer) + sizeof(int)));
+    NowLabel = buffer + *((int*)(NowLaber));
+    break;
+    })
+
+MAKS_CMD (RET, 1,
+    {
+    NowLabel = buffer + label_stack.top;
+    label_stack.pop;
+    break;
+    })
