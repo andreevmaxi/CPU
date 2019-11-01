@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="ASM.cpp" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="ASM.cpp" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="3904" topLine="180" />
+			<Cursor1 position="4187" topLine="199" />
+		</Cursor>
+	</File>
+	<File name="ASM_TEST.cpp" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="3317" topLine="145" />
 		</Cursor>
 	</File>
 	<File name="CPU.cpp" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="1296" topLine="0" />
+			<Cursor1 position="780" topLine="24" />
 		</Cursor>
 		<Folding>
-			<Collapse line="13" />
-			<Collapse line="20" />
-			<Collapse line="23" />
-			<Collapse line="28" />
-			<Collapse line="31" />
 			<Collapse line="51" />
 			<Collapse line="53" />
 			<Collapse line="67" />
@@ -28,84 +28,27 @@
 			<Collapse line="102" />
 		</Folding>
 	</File>
-	<File name="libs\FileWork.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="CPU_TEST.cpp" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="17" topLine="0" />
+			<Cursor1 position="2202" topLine="75" />
+		</Cursor>
+	</File>
+	<File name="config\default.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="3897" topLine="37" />
 		</Cursor>
 		<Folding>
-			<Collapse line="2" />
-			<Collapse line="25" />
-			<Collapse line="27" />
-			<Collapse line="29" />
-			<Collapse line="34" />
-			<Collapse line="51" />
-			<Collapse line="53" />
-			<Collapse line="55" />
-			<Collapse line="65" />
+			<Collapse line="186" />
 		</Folding>
 	</File>
-	<File name="libs\MaksStack.h" open="0" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="libs\FileWork.h" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="6008" topLine="45" />
+			<Cursor1 position="278" topLine="0" />
 		</Cursor>
-		<Folding>
-			<Collapse line="0" />
-			<Collapse line="5" />
-			<Collapse line="14" />
-			<Collapse line="27" />
-			<Collapse line="47" />
-			<Collapse line="59" />
-			<Collapse line="110" />
-			<Collapse line="135" />
-			<Collapse line="150" />
-			<Collapse line="165" />
-			<Collapse line="176" />
-			<Collapse line="178" />
-			<Collapse line="181" />
-			<Collapse line="185" />
-			<Collapse line="195" />
-			<Collapse line="204" />
-			<Collapse line="206" />
-			<Collapse line="209" />
-			<Collapse line="214" />
-			<Collapse line="227" />
-			<Collapse line="242" />
-			<Collapse line="249" />
-			<Collapse line="255" />
-			<Collapse line="261" />
-			<Collapse line="267" />
-			<Collapse line="273" />
-			<Collapse line="275" />
-			<Collapse line="281" />
-			<Collapse line="284" />
-			<Collapse line="289" />
-			<Collapse line="295" />
-			<Collapse line="307" />
-			<Collapse line="313" />
-			<Collapse line="319" />
-			<Collapse line="331" />
-			<Collapse line="336" />
-			<Collapse line="346" />
-			<Collapse line="351" />
-			<Collapse line="360" />
-			<Collapse line="372" />
-			<Collapse line="377" />
-			<Collapse line="387" />
-			<Collapse line="397" />
-			<Collapse line="409" />
-			<Collapse line="416" />
-			<Collapse line="421" />
-			<Collapse line="432" />
-			<Collapse line="444" />
-			<Collapse line="452" />
-			<Collapse line="469" />
-			<Collapse line="480" />
-			<Collapse line="492" />
-			<Collapse line="498" />
-			<Collapse line="503" />
-			<Collapse line="516" />
-			<Collapse line="527" />
-			<Collapse line="531" />
-		</Folding>
+	</File>
+	<File name="libs\MaksStack.h" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1532" topLine="46" />
+		</Cursor>
 	</File>
 </CodeBlocks_layout_file>

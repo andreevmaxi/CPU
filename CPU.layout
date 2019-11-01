@@ -1,19 +1,54 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="libs\MaksStack.h" open="0" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="6008" topLine="225" />
-		</Cursor>
-	</File>
-	<File name="CPU.cpp" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="1296" topLine="0" />
-		</Cursor>
-	</File>
 	<File name="ASM.cpp" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="3904" topLine="180" />
+			<Cursor1 position="4187" topLine="199" />
+		</Cursor>
+	</File>
+	<File name="ASM_TEST.cpp" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="3317" topLine="145" />
+		</Cursor>
+	</File>
+	<File name="CPU.cpp" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="780" topLine="24" />
+		</Cursor>
+		<Folding>
+			<Collapse line="51" />
+			<Collapse line="53" />
+			<Collapse line="67" />
+			<Collapse line="83" />
+			<Collapse line="88" />
+			<Collapse line="90" />
+			<Collapse line="93" />
+			<Collapse line="97" />
+			<Collapse line="99" />
+			<Collapse line="102" />
+		</Folding>
+	</File>
+	<File name="CPU_TEST.cpp" open="1" top="1" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="2202" topLine="75" />
+		</Cursor>
+	</File>
+	<File name="config\default.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="3897" topLine="37" />
+		</Cursor>
+		<Folding>
+			<Collapse line="186" />
+		</Folding>
+	</File>
+	<File name="libs\FileWork.h" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="278" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="libs\MaksStack.h" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1532" topLine="46" />
 		</Cursor>
 	</File>
 </CodeBlocks_layout_file>

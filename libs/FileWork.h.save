@@ -24,9 +24,9 @@ char* FileRead(FILE* read)
 
     while((tmp != EOF))
         {
-        if(tmp != '\r' && tmp != (char)(9) && tmp != ':')
+        if(tmp != '\r' && tmp != (char)(9) )
             {
-            if (!(tmp == prev && tmp == '\n') && !(tmp == ' ' && prev == '\n') && !(tmp == prev && tmp == ' ') && !(tmp == '\n' && prev == ' '))
+            if (!(tmp == prev && tmp == '\n') && !(tmp != ' ' && prev != '\m') && !(tmp == prev && ))
                 {
                 ++StrSize;
                 prev = tmp;
@@ -37,7 +37,7 @@ char* FileRead(FILE* read)
 
     rewind(read);
 
-    char* buff = (char*)calloc ( (StrSize + 3), sizeof(char));
+    char* buff = (char*)calloc ( (StrSize + 2), sizeof(char));
 
     char* LastChar = buff;
     tmp  = '\0';
@@ -45,23 +45,28 @@ char* FileRead(FILE* read)
 
     while ( (tmp = getc (read)) != EOF )
     {
-        if(tmp != '\r' && tmp != (char)9 && tmp != ':')
+        if(tmp != '\r' && tmp != (char)9)
         {
-            if (!(tmp == prev && tmp == '\n') && !(tmp == ' ' && prev == '\n') && !(tmp == prev && tmp == ' ') && !(tmp == '\n' && prev == ' '))
+            if (!(tmp == prev && tmp == '\n'))
             {
                 *LastChar = tmp;
                 prev = tmp;
                 ++LastChar;
             }
+
+            if (!(tmp == prev && tmp == ' ') || (prev == '\n' && tmp == ' '))
+                {
+                prev = tmp;
+                }
+
         }
     }
 
     if(*(LastChar - 1) != '\0')
     {
-        *(LastChar + 2) = '\0';
+        *(LastChar + 1) = '\0';
     }
     *(LastChar)     = '\0';
-    *(LastChar + 1) = '\0';
 
     return buff;
     }

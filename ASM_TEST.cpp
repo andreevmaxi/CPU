@@ -5,17 +5,18 @@
 #include <cstdlib>
 #include <cassert>
 #include <string>
+#include <string.h>
 
 #include "libs/MaksStack.h"
 #include "libs/FileWork.h"
 #include "config/default_enum.h"
+
 struct signatyre
     {
-    const char FirstChar;  /// what
-    const char SecondChar; /// endian
-    const char ProgramN1;  /// Name
-    const char ProgramN2;  /// DadName
-    const char ProgramN3;  /// SurName
+    char FirstChar;  /// what
+    char SecondChar; /// endian
+    char ProgramN1;  /// Name
+    char ProgramN2;  /// SurName
     int SizeOfBytesInFile;
     };
 
@@ -35,6 +36,8 @@ bool BufferTreatment(char* buffer, char* ans, int* CharNum);
 
 bool BufferReplaceEnterOnZero(char* buffer);
 
+bool FileWrite(char* ans, signatyre* KorobCom, FILE* Output);
+
 int main(int argc, char* argv[])
     {
     FILE* TmpFile;
@@ -45,11 +48,17 @@ int main(int argc, char* argv[])
     SignatyreCreate(&KorobCom);
 
     char* ans = (char*) calloc(AnsSizeSuggestion(buffer), sizeof(char));
+    BufferReplaceEnterOnZero(buffer);
+    fclose(TmpFile);
 
     BufferTreatment(buffer, ans, &(KorobCom.SizeOfBytesInFile));
 
-    FileOpen(&TmpFile, 1, argc, argv);
-    FileWrite(ans, &KorobCom, TmpFile);
+    FILE* FileOutp;
+    FileOpen(&FileOutp, 1, argc, argv);
+
+    FileWrite(ans, &KorobCom, FileOutp);
+    fclose(FileOutp);
+
     free(ans);
     free(buffer);
     return 0;
@@ -107,8 +116,7 @@ bool SignatyreCreate(signatyre* a)
     a->FirstChar  = 'I';
     a->SecondChar = 'I';
     a->ProgramN1  = 'M';
-    a->ProgramN2  = 'D';
-    a->ProgramN3  = 'K';
+    a->ProgramN2  = 'K';
 
     return 1;
     }
@@ -117,16 +125,17 @@ bool BufferTreatment(char* buffer, char* ans, int* CharNum)
     {
     std::vector <UserFunc> Labels;
 
+    *CharNum     = 0;
     int NowLabel = 0;
     char* TmpAns    = ans;
     char* TmpBuffer = buffer;
-
-    int NowOper = 0;
+    int LabelNum = 0;
+    int NowOper  = 0;
     while(*TmpBuffer != '\0')
         {
         NowOper = -1;
         #define MAKS_CMD( Id, Name, Args, Code, AsmCode )    \
-            if(!(strcmp(buffer, #Name)))                 \
+            if(!(strcmp(TmpBuffer, #Name)))                     \
                 NowOper = CMD_##Name;
 
         #include "config/default.h"
@@ -135,81 +144,94 @@ bool BufferTreatment(char* buffer, char* ans, int* CharNum)
 
         switch(NowOper)
             {
-            #define MAKS_CMD( Id, Name, Args, Code, AsmCode )    \
-            case(CMD_##Name):                                    \
-                ++NowLabel                                   \
-                while(*TmpBuffer != '\0')                    \
-                    {                                        \
-                    ++TmpBuffer;                             \
-                    }                                        \
-                NowLabel += Args * 4;                        \
+            #define MAKS_CMD( Id, Name, Args, Code, AsmCode )      \
+            case(CMD_##Name):                                      \
+                ++NowLabel;                                        \
+                while(*TmpBuffer != '\0')                          \
+                    {                                              \
+                    ++TmpBuffer;                                   \
+                    }                                              \
+                ++TmpBuffer;                                       \
+                for(int i = 0; i < Args; ++i)                      \
+                    {                                              \
+                    while(*TmpBuffer != '\0')                      \
+                        {                                          \
+                        ++TmpBuffer;                               \
+                        }                                          \
+                    ++TmpBuffer;                                   \
+                    }                                              \
+                NowLabel += Args * 4;                              \
                 break;
 
             #include "config/default.h"
 
             default:
+                ++NowLabel;
+                Labels.push_back(UserFunc());
                 Labels[LabelNum].name = TmpBuffer;
                 Labels[LabelNum].label = NowLabel;
+                ++LabelNum;
                 while(*TmpBuffer != '\0')
                     {
                     ++TmpBuffer;
                     }
+                ++TmpBuffer;
                 break;
             }
 
         #undef MAKS_CMD
-        while(*TmpBuffer != '\0')
-            {
-            ++TmpBuffer;
-            }
+        }
 
-        ++TmpBuffer;
-        }FileWrite(ans, KorobCom, TmpFile);
 
     TmpAns    = ans;
     TmpBuffer = buffer;
-
     while(*TmpBuffer != '\0')
         {
+
         NowOper = -1;
         #define MAKS_CMD( Id, Name, Args, Code, AsmCode )    \
-            if(!(strcmp(buffer, #Name)))                 \
+            if(!(strcmp(TmpBuffer, #Name)))                  \
                 NowOper = CMD_##Name;
 
         #include "config/default.h"
 
         #undef MAKS_CMD
 
+        int FArgc = 0;
+
         switch(NowOper)
             {
             #define MAKS_CMD( Id, Name, Args, Code, AsmCode )    \
             case(CMD_##Name):                                    \
-                                                                 \
+                FArgc = Args;                                    \
                 *TmpAns = NowOper;                               \
                 ++TmpAns;                                        \
                 AsmCode                                          \
-                break;
+                break;                                           \
 
             #include "config/default.h"
 
             default:
+                ++(*CharNum);
+                *TmpAns = (char)0;
+                ++TmpAns;
+                while(*TmpBuffer != '\0')
+                    {
+                    ++TmpBuffer;
+                    }
+                ++TmpBuffer;
                 break;
             }
-
         #undef MAKS_CMD
-        while(*TmpBuffer != '\0')
-            {
-            ++TmpBuffer;
-            }
-
-        ++TmpBuffer;
         }
+    *TmpAns = '\0';
+    ++(*CharNum);
     return 1;
     }
 
 bool BufferReplaceEnterOnZero(char* buffer)
     {
-    while(*buffer != '\0');
+    while(*buffer != '\0')
         {
         if(*buffer == ' ' || *buffer == '\n')
             {
@@ -222,8 +244,15 @@ bool BufferReplaceEnterOnZero(char* buffer)
 
 bool FileWrite(char* ans, signatyre* KorobCom, FILE* Output)
     {
-    fwrite(KorobCom, sizeof(char), sizeof(signatyre), Output);
-    fwrite(ans, sizeof(char), KorobCom->SizeOfBytesInFile, CodeFile);
+    assert(ans != NULL);
+    assert(KorobCom != NULL);
+    assert(Output != NULL);
 
+
+    fwrite(KorobCom, sizeof(char), (int)sizeof(signatyre), stdout);
+    fwrite(ans, sizeof(char), (int)KorobCom->SizeOfBytesInFile, stdout);
+
+    fwrite(KorobCom, sizeof(char), (int)sizeof(signatyre), Output);
+    fwrite(ans, sizeof(char), (int)KorobCom->SizeOfBytesInFile, Output);
     return 1;
     }

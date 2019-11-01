@@ -5,14 +5,6 @@
 * 3 arg - num of args of func
 * 4 arg - mode (1 - for default functions, 2 - for funcs with labels)
 */
-
-#include <stack>
-#include <iostream>
-#include <chrono>
-#include <ctime>
-#include <cstdio>
-#include <cassert>
-#include <cstdlib>
 #include "CPUStackUseHelper.h"
 
 MAKS_CMD (0, END, 0,
@@ -24,12 +16,18 @@ MAKS_CMD (0, END, 0,
     },
     {
     ++(*CharNum);
+    while(*TmpBuffer != '\0')
+        {
+        ++TmpBuffer;
+        }
+    ++TmpBuffer;
+
     })
 
 MAKS_CMD (1, PUSH, 1,
     {
-    PUSH(*((StackElem_t*)(NowLabel)));
-    NowLabel += sizeof(StackElem_t);
+    MAKS_PUSH(*((StackElem_t*)(NowLabel)));
+    NowLabel += sizeof(StackElem_t);              
     break;
     },
     {
@@ -38,7 +36,8 @@ MAKS_CMD (1, PUSH, 1,
         {
         ++TmpBuffer;
         }
-    for(int i = 0, i < Argc, ++i)
+    ++TmpBuffer;
+    for(int i = 0; i < FArgc; ++i)
         {
         int  TmpInt = atoi(TmpBuffer);
 
@@ -48,6 +47,11 @@ MAKS_CMD (1, PUSH, 1,
             ++TmpAns;
             ++(*CharNum);
             }
+        while(*TmpBuffer != '\0')
+            {
+            ++TmpBuffer;
+            }
+        ++TmpBuffer;
         }
     })
 
@@ -58,6 +62,12 @@ MAKS_CMD (2, POP, 0,
     },
     {
     ++(*CharNum);
+    while(*TmpBuffer != '\0')
+        {
+        ++TmpBuffer;
+        }
+    ++TmpBuffer;
+
     })
 
 MAKS_CMD (3, ADD, 0,
@@ -69,7 +79,12 @@ MAKS_CMD (3, ADD, 0,
     },
     {
     ++(*CharNum);
-    })
+    while(*TmpBuffer != '\0')
+        {
+        ++TmpBuffer;
+        }
+    ++TmpBuffer;
+})
 
 MAKS_CMD (4, SUB, 0,
     {
@@ -80,7 +95,12 @@ MAKS_CMD (4, SUB, 0,
     },
     {
     ++(*CharNum);
-    })
+    while(*TmpBuffer != '\0')
+        {
+        ++TmpBuffer;
+        }
+    ++TmpBuffer;
+})
 
 MAKS_CMD (5, MUL, 0,
     {
@@ -91,7 +111,12 @@ MAKS_CMD (5, MUL, 0,
     },
     {
     ++(*CharNum);
-    })
+    while(*TmpBuffer != '\0')
+        {
+        ++TmpBuffer;
+        }
+    ++TmpBuffer;
+})
 
 MAKS_CMD (6, DIV, 0,
     {
@@ -110,7 +135,12 @@ MAKS_CMD (6, DIV, 0,
     },
     {
     ++(*CharNum);
-    })
+    while(*TmpBuffer != '\0')
+        {
+        ++TmpBuffer;
+        }
+    ++TmpBuffer;
+})
 
 MAKS_CMD (7, SQRT, 0,
     {
@@ -129,7 +159,12 @@ MAKS_CMD (7, SQRT, 0,
     },
     {
     ++(*CharNum);
-    })
+    while(*TmpBuffer != '\0')
+        {
+        ++TmpBuffer;
+        }
+    ++TmpBuffer;
+})
 
 MAKS_CMD (8, IN, 0,
     {
@@ -141,17 +176,27 @@ MAKS_CMD (8, IN, 0,
     },
     {
     ++(*CharNum);
-    })
+    while(*TmpBuffer != '\0')
+        {
+        ++TmpBuffer;
+        }
+    ++TmpBuffer;
+})
 
 MAKS_CMD (9, OUT, 0,
     {
     StackElem_t tmp1 = MAKS_POP;
-    std::cout << tmp1;
+    std::cout << tmp1 << std::endl;
     break;
     },
     {
     ++(*CharNum);
-    })
+    while(*TmpBuffer != '\0')
+        {
+        ++TmpBuffer;
+        }
+    ++TmpBuffer;
+})
 
 MAKS_CMD (10, OUTFILE, 0,
     {
@@ -161,12 +206,17 @@ MAKS_CMD (10, OUTFILE, 0,
     },
     {
     ++(*CharNum);
-    })
+    while(*TmpBuffer != '\0')
+        {
+        ++TmpBuffer;
+        }
+    ++TmpBuffer;
+})
 
 
 MAKS_CMD (11, JMP, 1,
     {
-    NowLabel = buffer + *((int*)(NowLaber));
+    NowLabel = buffer + *((int*)(NowLabel));
     break;
     },
     {
@@ -175,12 +225,13 @@ MAKS_CMD (11, JMP, 1,
         {
         ++TmpBuffer;
         }
-    for(int i = 0, i < Argc, ++i)
+    ++TmpBuffer;
+    for(int i = 0; i < FArgc; ++i)
         {
         int TmpInt = -1;
         for(int i = 0; i < Labels.size(); ++i)
             {
-            if(TmpBuffer == Labels[i].name)
+            if(!(strcmp(TmpBuffer, Labels[i].name)))
                 {
                 TmpInt = Labels[i].label;
                 }
@@ -196,21 +247,26 @@ MAKS_CMD (11, JMP, 1,
             ++TmpAns;
             ++(*CharNum);
             }
+        while(*TmpBuffer != '\0')
+            {
+            ++TmpBuffer;
+            }
+        ++TmpBuffer;
         }
     })
 
 MAKS_CMD (12, JA, 1,
     {
     StackElem_t tmp1 = MAKS_POP;
-    StackElem_t tmp2 = MAKS_POP;
+    tmp2 = MAKS_POP;
 
     if (tmp2 > tmp1)
         {
-        NowLabel = buffer + *((int*)(NowLaber));
+        NowLabel = buffer + *((int*)(NowLabel));
         }else
         {
         NowLabel += sizeof(int);
-        }
+        }           
     break;
     },
     {
@@ -219,12 +275,13 @@ MAKS_CMD (12, JA, 1,
         {
         ++TmpBuffer;
         }
-    for(int i = 0, i < Argc, ++i)
+    ++TmpBuffer;
+    for(int i = 0; i < FArgc; ++i)
         {
         int TmpInt = -1;
         for(int i = 0; i < Labels.size(); ++i)
             {
-            if(TmpBuffer == Labels[i].name)
+            if(!(strcmp(TmpBuffer, Labels[i].name)))
                 {
                 TmpInt = Labels[i].label;
                 }
@@ -240,6 +297,12 @@ MAKS_CMD (12, JA, 1,
             ++TmpAns;
             ++(*CharNum);
             }
+        while(*TmpBuffer != '\0')
+            {
+            ++TmpBuffer;
+            }
+        ++TmpBuffer;
+
         }
     })
 
@@ -250,7 +313,7 @@ MAKS_CMD (13, JAE, 1,
 
     if (tmp2 >= tmp1)
         {
-        NowLabel = buffer + *((int*)(NowLaber));
+        NowLabel = buffer + *((int*)(NowLabel));
         }else
         {
         NowLabel += sizeof(int);
@@ -263,12 +326,13 @@ MAKS_CMD (13, JAE, 1,
         {
         ++TmpBuffer;
         }
-    for(int i = 0, i < Argc, ++i)
+    ++TmpBuffer;
+    for(int i = 0; i < FArgc; ++i)
         {
         int TmpInt = -1;
         for(int i = 0; i < Labels.size(); ++i)
             {
-            if(TmpBuffer == Labels[i].name)
+            if(!(strcmp(TmpBuffer, Labels[i].name)))
                 {
                 TmpInt = Labels[i].label;
                 }
@@ -284,6 +348,11 @@ MAKS_CMD (13, JAE, 1,
             ++TmpAns;
             ++(*CharNum);
             }
+        while(*TmpBuffer != '\0')
+            {
+            ++TmpBuffer;
+            }
+        ++TmpBuffer;
         }
     })
 
@@ -294,7 +363,7 @@ MAKS_CMD (14, JB, 1,
 
     if (tmp2 < tmp1)
         {
-        NowLabel = buffer + *((int*)(NowLaber));
+        NowLabel = buffer + *((int*)(NowLabel));
         }else
         {
         NowLabel += sizeof(int);
@@ -307,12 +376,13 @@ MAKS_CMD (14, JB, 1,
         {
         ++TmpBuffer;
         }
-    for(int i = 0, i < Argc, ++i)
+    ++TmpBuffer;
+    for(int i = 0; i < FArgc; ++i)
         {
         int TmpInt = -1;
         for(int i = 0; i < Labels.size(); ++i)
             {
-            if(TmpBuffer == Labels[i].name)
+            if(!(strcmp(TmpBuffer, Labels[i].name)))
                 {
                 TmpInt = Labels[i].label;
                 }
@@ -328,6 +398,11 @@ MAKS_CMD (14, JB, 1,
             ++TmpAns;
             ++(*CharNum);
             }
+        while(*TmpBuffer != '\0')
+            {
+            ++TmpBuffer;
+            }
+        ++TmpBuffer;
         }
     })
 
@@ -338,7 +413,7 @@ MAKS_CMD (15, JBE, 1,
 
     if (tmp2 <= tmp1)
         {
-        NowLabel = buffer + *((int*)(NowLaber));
+        NowLabel = buffer + *((int*)(NowLabel));
         }else
         {
         NowLabel += sizeof(int);
@@ -351,12 +426,13 @@ MAKS_CMD (15, JBE, 1,
         {
         ++TmpBuffer;
         }
-    for(int i = 0, i < Argc, ++i)
+    ++TmpBuffer;
+    for(int i = 0; i < FArgc; ++i)
         {
         int TmpInt = -1;
         for(int i = 0; i < Labels.size(); ++i)
             {
-            if(TmpBuffer == Labels[i].name)
+            if(!(strcmp(TmpBuffer, Labels[i].name)))
                 {
                 TmpInt = Labels[i].label;
                 }
@@ -372,6 +448,12 @@ MAKS_CMD (15, JBE, 1,
             ++TmpAns;
             ++(*CharNum);
             }
+        while(*TmpBuffer != '\0')
+            {
+            ++TmpBuffer;
+            }
+        ++TmpBuffer;
+
         }
     })
 
@@ -382,7 +464,7 @@ MAKS_CMD (16, JE, 1,
 
     if (tmp2 == tmp1)
         {
-        NowLabel = buffer + *((int*)(NowLaber));
+        NowLabel = buffer + *((int*)(NowLabel));
         }else
         {
         NowLabel += sizeof(int);
@@ -395,12 +477,13 @@ MAKS_CMD (16, JE, 1,
         {
         ++TmpBuffer;
         }
-    for(int i = 0, i < Argc, ++i)
+    ++TmpBuffer;
+    for(int i = 0; i < FArgc; ++i)
         {
         int TmpInt = -1;
         for(int i = 0; i < Labels.size(); ++i)
             {
-            if(TmpBuffer == Labels[i].name)
+            if(!(strcmp(TmpBuffer, Labels[i].name)))
                 {
                 TmpInt = Labels[i].label;
                 }
@@ -416,6 +499,11 @@ MAKS_CMD (16, JE, 1,
             ++TmpAns;
             ++(*CharNum);
             }
+        while(*TmpBuffer != '\0')
+            {
+            ++TmpBuffer;
+            }
+        ++TmpBuffer;
         }
     })
 
@@ -426,7 +514,7 @@ MAKS_CMD (17, JNE, 1,
 
     if (tmp2 != tmp1)
         {
-        NowLabel = buffer + *((int*)(NowLaber));
+        NowLabel = buffer + *((int*)(NowLabel));
         }else
         {
         NowLabel += sizeof(int);
@@ -439,12 +527,13 @@ MAKS_CMD (17, JNE, 1,
         {
         ++TmpBuffer;
         }
-    for(int i = 0, i < Argc, ++i)
+    ++TmpBuffer;
+    for(int i = 0; i < FArgc; ++i)
         {
         int TmpInt = -1;
         for(int i = 0; i < Labels.size(); ++i)
             {
-            if(TmpBuffer == Labels[i].name)
+            if(!(strcmp(TmpBuffer, Labels[i].name)))
                 {
                 TmpInt = Labels[i].label;
                 }
@@ -460,13 +549,19 @@ MAKS_CMD (17, JNE, 1,
             ++TmpAns;
             ++(*CharNum);
             }
+        while(*TmpBuffer != '\0')
+            {
+            ++TmpBuffer;
+            }
+        ++TmpBuffer;
+
         }
     })
 
 MAKS_CMD (18, CALL, 1,
     {
-    label_stack.push(((int)(NowLaber - buffer) + sizeof(int)));
-    NowLabel = buffer + *((int*)(NowLaber));
+    label_stack.push(((int)(NowLabel - buffer) + sizeof(int)));
+    NowLabel = buffer + *((int*)(NowLabel));
     break;
     },
     {
@@ -475,19 +570,20 @@ MAKS_CMD (18, CALL, 1,
         {
         ++TmpBuffer;
         }
-    for(int i = 0, i < Argc, ++i)
+    ++TmpBuffer;
+    for(int i = 0; i < FArgc; ++i)
         {
         int TmpInt = -1;
         for(int i = 0; i < Labels.size(); ++i)
             {
-            if(TmpBuffer == Labels[i].name)
+            if(!(strcmp(TmpBuffer, Labels[i].name)))
                 {
                 TmpInt = Labels[i].label;
                 }
             }
         if(TmpInt == -1)
             {
-            printf("(!!!CRIT_ERROR)!!!\nYour jmp points to undefined label!\nUL: %s", TmpBuffer);
+            printf("(!!!CRIT_ERROR)!!!\nYour jmp points to undefined label!\nUL: %s\n", TmpBuffer);
             }
         assert(TmpInt != -1);
         for(int i = 0; i < 4; ++i)
@@ -496,15 +592,25 @@ MAKS_CMD (18, CALL, 1,
             ++TmpAns;
             ++(*CharNum);
             }
+        while(*TmpBuffer != '\0')
+            {
+            ++TmpBuffer;
+            }
+        ++TmpBuffer;
         }
     })
 
 MAKS_CMD (19, RET, 1,
     {
-    NowLabel = buffer + label_stack.top;
-    label_stack.pop;
+    NowLabel = (char*)((int)buffer + (int)label_stack.top());
+    label_stack.pop();
     break;
     },
     {
     ++(*CharNum);
+    while(*TmpBuffer != '\0')
+        {
+        ++TmpBuffer;
+        }
+    ++TmpBuffer;
     })

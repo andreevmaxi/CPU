@@ -12,6 +12,8 @@
 #include <string>
 #include <cassert>
 
+#define 
+
 #ifdef _DEBUG
     #define DEB( code ) code
 #else
@@ -457,7 +459,6 @@ bool StackInit(DedStack_t* aStack)
     #endif
     DEB(aStack->CanaryDataRight = (aStack->data + aStack->SizeStack + 1) );
     DEB(aStack->CanaryDataLeft = aStack->data);
-
     DEB(++aStack->data);
     DEB(*aStack->CanaryDataRight = 230);
     DEB(*aStack->CanaryDataLeft = 230);

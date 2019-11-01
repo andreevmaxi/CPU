@@ -33,9 +33,13 @@
 			<Add option="-fexceptions" />
 		</Compiler>
 		<Unit filename="ASM.cpp" />
+		<Unit filename="ASM_TEST.cpp" />
 		<Unit filename="CPU.cpp" />
+		<Unit filename="CPU_TEST.cpp" />
 		<Unit filename="DEASM.cpp" />
-		<Unit filename="libs/MaksAssert.h" />
+		<Unit filename="config/default.h" />
+		<Unit filename="config/default_enum.h" />
+		<Unit filename="libs/FileWork.h" />
 		<Unit filename="libs/MaksStack.h" />
 		<Extensions>
 			<code_completion />
